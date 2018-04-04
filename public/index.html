@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BrandLive Seats Plat</title>
+    <style>
+        .line { overflow: hidden; }
+        .seat {
+            margin: 2px; float: left;
+            width: 30px; height: 30px;
+            border-radius: 3px;
+        }
+        
+        .enable { background: gray; }
+        .enable:hover { background: black; }
+        .disable { background: red; }
+    </style>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.js"></script>
+    <!-- 소켓 생성 -->
+    <script>
+
+        var accountGroupNo ;
+        // 소켓 이벤트를 수행합니다.
+        var socket = io.connect();
+
+
+        socket.on('disconnect', ()=> {
+            alert( "server maybe shutdown!")
+        });
+
+        // 각종 오류 ( DB 오류, 계정 없음 등등 )
+        socket.on('grid-error', serverData => {
+            alert(JSON.stringify(serverData));
+        });
+
+        // 예약실패 ( 누군가 먼저 선점 한 경우 )
+        socket.on('reserve-failed', serverData => {
+            alert(JSON.stringify(serverData));
+        });
+
+        // 예약에 성공하면 아래 두개의 이벤트가 발생 
+        // 1. 자신의 예약에 대한 성공 이벤트가 발생 
+        socket.on('my-reserve-succ', serverData => {
+            var $target = $('div[data-x = ' + serverData.colIndex + '][data-y = ' + serverData.rowIndex + ']');
+            $target.removeClass('enable');
+            $target.addClass('disable');
+        });
+
+        // 2. 같은 세션에 있는 자신을 포함한 모든 클라이언트에게 성공 이벤트가 발생한다. 
+        socket.on('reserve-succ', serverData => {
+            var $target = $('div[data-x = ' + serverData.colIndex + '][data-y = ' + serverData.rowIndex + ']');
+            $target.removeClass('enable');
+            $target.addClass('disable');
+        });
+
+        socket.on('assign-failed', serverData => {
+            alert(JSON.stringify(serverData));
+        });
+
+        // 자신이 할당해서 성공한 좌석의 색깔은 달리 보여야 한다. 
+        // 자동으로 여기저기서 갱신이 되서 헷갈려. 
+        socket.on('my-assign-succ', serverData => {
+            $.each( serverData, (index, seat) => { 
+                var $target = $('div[data-x = ' + seat.colIndex + '][data-y = ' + seat.rowIndex + ']');
+                $target.removeClass('enable');
+                $target.addClass('disable');
+            });
+        });
+
+        socket.on('assign-succ', serverData => {
+            $.each( serverData, (index, seat) => { 
+                var $target = $('div[data-x = ' + seat.colIndex + '][data-y = ' + seat.rowIndex + ']');
+                $target.removeClass('enable');
+                $target.addClass('disable');
+            });
+        });
+
+        socket.on('cancel-succ', ServerData => {
+            var $target = $('div[data-x = ' + ServerData.colIndex + '][data-y = ' + ServerData.rowIndex + ']');
+            $target.removeClass('disable');
+            $target.addClass('enable');
+        });
+
+        socket.on('my-cancel-seats-succ', ServerData => {
+            $.each( ServerData.seats, (index, seat) => { 
+                    var $target = $('div[data-x = ' + seat.colIndex + '][data-y = ' + seat.rowIndex + ']');
+                    $target.removeClass('disable');
+                    $target.addClass('enable');
+            });
+        });
+
+        socket.on( 'cancel-seats-failed', ServerData => {
+            alert(JSON.stringify(ServerData));
+        } );
+
+        socket.on('ready', serverData => {
+
+            alert( JSON.stringify(serverData));
+            if( serverData.accountGroupNo != undefined ){
+                accountGroupNo = serverData.accountGroupNo;
+                socket.emit('group-seats',  { id : "brandlive",
+                                              apiKey : "xxxx", 
+                                              accountGroupNo : serverData.accountGroupNo , 
+                                              eventSessionIndex : 0, 
+                                              seatGroupIndex : 0 
+                                            } );
+            }
+        });
+
+        socket.on('group-seats', serverData => {
+
+
+            var onClickFirstCoupleSeatsCancel = function () {
+
+                    socket.emit('cancel-seats', {
+                        id : "brandlive",
+                        apiKey : "xxxx",
+                        accountGroupNo : 0,
+                        eventSessionIndex : 0,
+                        seatGroupIndex : 0,
+                        seats : [
+                            { rowIndex : 0, colIndex : 0 }, 
+                            { rowIndex : 0, colIndex : 1 }
+                        ]
+                    });
+
+            }
+
+            var onClickAssign = function () {
+                var assignCount = $(this).attr('assign');
+                socket.emit('assign', {
+                    id : "brandlive",
+                    apiKey : "xxxx",
+                    accountGroupNo,
+                    eventSessionIndex : 0,
+                    seatGroupIndex : 0,
+                    seatCount : assignCount
+                });
+            }
+
+            // 변수를 선언합니다.
+            var onClickSeat = function () {
+                var x = $(this).attr('data-x');
+                var y = $(this).attr('data-y');
+                    $(this).off('click');
+                    socket.emit('reserve', {
+                        id : "brandlive",
+                        apiKey : "xxxx",
+                        accountGroupNo,
+                        eventSessionIndex : 0,
+                        seatGroupIndex : 0,
+                        colIndex: x,
+                        rowIndex: y
+                    });
+
+                /*if( $(this).hasClass('enable') ){
+                    //$(this).off('click');
+                    socket.emit('reserve', {
+                        id : "brandlive",
+                        apiKey : "xxxx",
+                        accountGroupNo,
+                        eventSessionIndex : 0,
+                        seatGroupIndex : 0,
+                        colIndex: x,
+                        rowIndex: y
+                    });
+                }else{
+                    socket.emit('cancel', {
+                        id : "brandlive",
+                        apiKey : "xxxx",
+                        accountGroupNo,
+                        eventSessionIndex : 0,
+                        seatGroupIndex : 0,
+                        colIndex: x,
+                        rowIndex: y
+                    });
+                }*/
+                
+
+            };
+
+            $.each( serverData.seats, (indexY, row) => {
+
+                var $line = $('<div></div>').addClass('line');
+
+                $.each( row, ( indexX, seat ) => {
+
+                    var $output = $('<div></div>', {
+                        'class': 'seat',
+                        'data-x': seat.colIndex,
+                        'data-y': seat.rowIndex,
+                        'seat-name' : seat.seatName,
+                        'seat-seq' : seat.seq
+                    }).appendTo($line);
+
+                    if( seat.reserved == "N"){
+                        // 좌석이 비어 있으면 enable 클래스와 click 리스너를 추가합니다.
+                        $output.addClass('enable').on('click', onClickSeat);
+                    }else{
+                        $output.addClass('disable').on('click', onClickSeat);
+                    }
+                });
+
+                // 문서 객체를 추가합니다.
+                $line.appendTo('body');
+            });
+
+            $('<div assign=1>[연속좌석할당하기1]</div>').on('click', onClickAssign).appendTo('body');
+            $('<div assign=2>[연속좌석할당하기2]</div>').on('click', onClickAssign).appendTo('body');
+            $('<div assign=3>[연속좌석할당하기3]</div>').on('click', onClickAssign).appendTo('body');
+
+            $('<div assign=3>[첫줄 2자리 취소하기]</div>').on('click', onClickFirstCoupleSeatsCancel).appendTo('body');
+
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            socket.emit('auth', { id: "brandlive", apiKey: "xxxx", eventSessionIndex : 0} );
+        });
+    </script>
+
+</head>
+<body>
+</body>
+</html>
