@@ -112,7 +112,7 @@ io.sockets.on('connection', function (socket) {
                     if( result.length > 0 ){
                         let newSeats = createSeats( result, clientData );
                         // client 에 'group-seats' 이벤트를 발생시킨다. 
-                        socket.emit('group-seats', { response : newSeats, request : clientData } );
+                        socket.emit('group-seats', { result : newSeats, request : clientData } );
                     }else{
                         logger.error( ERROR.EMPTY_SEATS, clientData);
                         //socket.emit('grid-error', ERROR.EMPTY_SEATS);
