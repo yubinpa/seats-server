@@ -198,8 +198,11 @@ io.sockets.on('connection', function (socket) {
                 //socket.emit('grid-error', ERROR.RESERVE_FAILD);
                 logger.info(`cancel succ : ${clientData.id}, row=${clientData.rowIndex}, col=${clientData.colIndex}`);
 
+                socket.emit('my-cancel-succ', { result : clientData, request : clientData } );
+
                 //io.sockets.in(`${clientData.accountGroupNo}^${clientData.eventSessionIndex}`).emit('reserve-succ', clientData );
-                io.sockets.in(socket.roomName).emit('cancel-succ', { result : clientData, request : clientData } );
+                //io.sockets.in(socket.roomName).emit('cancel-succ', { result : clientData, request : clientData } );
+                socket.broadcast.to( socket.roomName ).emit('my-cancel-succ', { result : clientData, request : clientData } );
 
                 dao.updateReservedSeat( 'N', clientData )
                     .then( dbResult => {
