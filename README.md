@@ -1,6 +1,8 @@
 # 데몬처럼 실행하기 
     npm start ( npm install -g forever  가 선행되어야 함. )
     npm stop 
+# node 로 실행하기 
+    node app.js
 # config/config.json
 {
     "processTitle" : "seat-server-proc",
