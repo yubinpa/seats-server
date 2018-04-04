@@ -202,7 +202,7 @@ io.sockets.on('connection', function (socket) {
 
                 //io.sockets.in(`${clientData.accountGroupNo}^${clientData.eventSessionIndex}`).emit('reserve-succ', clientData );
                 //io.sockets.in(socket.roomName).emit('cancel-succ', { result : clientData, request : clientData } );
-                socket.broadcast.to( socket.roomName ).emit('my-cancel-succ', { result : clientData, request : clientData } );
+                socket.broadcast.to( socket.roomName ).emit('cancel-succ', { result : clientData, request : clientData } );
 
                 dao.updateReservedSeat( 'N', clientData )
                     .then( dbResult => {
