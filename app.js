@@ -79,13 +79,13 @@ io.sockets.on('connection', function (socket) {
                     socket.emit('ready', { accountGroupNo : dbResult[0].group_no });
                 }
                 else{
-                    socket.emit('grid-error', ERROR.AUTH_FAILED);
+                    socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData } );
                     logger.info(`account not exists, id=${clientData.id}, apiKey=${clientData.apiKey}`);
                 }
 
             }).catch ( error => {
                 logger.error(error);
-                socket.emit('grid-error', ERROR.DATABASE );
+                socket.emit('grid-error', { result : ERROR.DATABASE, request : clientData } );
             })
     });
 
@@ -97,7 +97,7 @@ io.sockets.on('connection', function (socket) {
 
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
-            socket.emit('grid-error', { response : ERROR.AUTH_FAILED, request : clientData } );
+            socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData } );
             return;
         }
 
