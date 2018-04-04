@@ -2,7 +2,7 @@
     "processTitle" : "seat-server-proc",
 
     "db" : {
-        "host" : "117.52.74.253",
+        "host" : "*",
         "database" : "seats",
         "user" : "seats",
         "password" : "grid04)!"
