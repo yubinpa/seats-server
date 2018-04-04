@@ -96,7 +96,7 @@ io.sockets.on('connection', function (socket) {
         // TODO auth check
 
         if( !checkAuth( clientData )){
-            logger.error( `${JSON.stringfy(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
+            logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
             socket.emit('grid-error', { response : ERROR.AUTH_FAILED, request : clientData } );
             return;
         }
