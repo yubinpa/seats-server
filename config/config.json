@@ -2,7 +2,7 @@
     "processTitle" : "seat-server-proc",
 
     "db" : {
-        "host" : "*",
+        "host" : "**",
         "database" : "seats",
         "user" : "seats",
         "password" : "*"
