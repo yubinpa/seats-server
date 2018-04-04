@@ -5,7 +5,7 @@
         "host" : "*",
         "database" : "seats",
         "user" : "seats",
-        "password" : "grid04)!"
+        "password" : "*"
     },
 
     "log4j" : { 
