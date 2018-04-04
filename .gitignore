@@ -4,6 +4,6 @@ logs
 *.tmp
 *.bak
 *.log
-config
-config.json
+#config
+#config.json
 
