@@ -2,6 +2,17 @@ var db = require('./db.js');
 
 class Dao {
 
+    now() {
+        var date = new Date();
+        var m = date.getMonth()+1;
+        var d = date.getDate();
+        var h = date.getHours();
+        var i = date.getMinutes();
+        var s = date.getSeconds();
+        return date.getFullYear()+'-'+(m>9?m:'0'+m)+'-'+(d>9?d:'0'+d)+' '+(h>9?h:'0'+h)+':'+(i>9?i:'0'+i)+':'+(s>9?s:'0'+s);
+    }
+    
+
     selectGroupSeats( { accountGroupNo = 0, eventSessionIndex=0, seatGroupIndex = 0 } ){
 
         return new Promise ( (resolve, reject ) => {
@@ -32,7 +43,7 @@ class Dao {
     }
 
 
-    updateReservedSeat( reservedYn = 'Y', { accountGroupNo = 0, eventSessionIndex = 0, seatGroupIndex = 0, rowIndex, colIndex } ) {
+    updateReservedSeat( reservedYn = 'Y', { accountGroupNo = 0, eventSessionIndex = 0, seatGroupIndex = 0, rowIndex, colIndex, mobileTicketNo } ) {
 
         return new Promise(
 
@@ -43,9 +54,11 @@ class Dao {
                             AND   event_session_index = ? \
                             AND   seat_group_index = ? \
                             AND   seat_row_index = ? \
-                            AND   seat_column_index = ?"; 
+                            AND   seat_column_index = ? \
+                            AND   mobile_ticket_no = ? \
+                            AND   reserved_datetime = ?";
 
-                db.query( query, [ reservedYn, accountGroupNo, eventSessionIndex, seatGroupIndex, rowIndex, colIndex ],
+                db.query( query, [ reservedYn, accountGroupNo, eventSessionIndex, seatGroupIndex, rowIndex, colIndex, mobileTicketNo, this.now() ],
 
                     (result, error)=>{
                         if( !error ) {
