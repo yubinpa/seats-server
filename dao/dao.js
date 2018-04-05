@@ -49,16 +49,14 @@ class Dao {
 
             (resolve, reject) => {
 
-                let query = "UPDATE to_seats SET reserved = ? \
+                let query = "UPDATE to_seats SET reserved = ?, mobile_ticket_no = ?, reserved_datetime = ?, update_datetime = ? \
                             WHERE account_group_no = ? \
                             AND   event_session_index = ? \
                             AND   seat_group_index = ? \
                             AND   seat_row_index = ? \
-                            AND   seat_column_index = ? \
-                            AND   mobile_ticket_no = ? \
-                            AND   reserved_datetime = ?";
+                            AND   seat_column_index = ?"
 
-                db.query( query, [ reservedYn, accountGroupNo, eventSessionIndex, seatGroupIndex, rowIndex, colIndex, mobileTicketNo, this.now() ],
+                db.query( query, [ reservedYn, mobileTicketNo, this.now(), this.now(), accountGroupNo, eventSessionIndex, seatGroupIndex, rowIndex, colIndex ],
 
                     (result, error)=>{
                         if( !error ) {
@@ -79,10 +77,19 @@ class Dao {
         return new Promise(
 
             (resolve, reject) => {
+                let query = "";
+                let params = [];
+                //예약 쿼리 
+                if( reservedYn == 'Y'){
+                    query = "UPDATE to_seats SET reserved = ?, reserved_datetime = ?, update_datetime = ?  WHERE seq in (?) ";
+                    params = [ reservedYn, this.now(), this.now(), inStatement ];
+                }else{
+                //수정 쿼리 
+                    query = "UPDATE to_seats SET reserved = ?, update_datetime = ?  WHERE seq in (?) ";
+                    params = [ reservedYn, this.now(), inStatement ];
+                }
 
-                let query = "UPDATE to_seats SET reserved = ?  WHERE seq in (?) ";
-
-                db.query( query, [ reservedYn, inStatement ],
+                db.query( query, params, 
 
                     (result, error)=>{
                         if( !error ) {
