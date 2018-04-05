@@ -201,10 +201,11 @@ io.sockets.on('connection', function (socket) {
 
         }
     });
+
     /**
      * 좌석 삭제 
      */
-    socket.on('deletet', clientData => {
+    socket.on('delete', clientData => {
         
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
