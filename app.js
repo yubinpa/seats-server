@@ -445,8 +445,8 @@ let getSeats = (  { accountGroupNo, eventSessionIndex, seatGroupIndex} ) => {
     return seats;
 }
 
-let deleteSeats = (  { accountgroupno, eventsessionindex, seatgroupindex} ) => {
-    let mapkey = `${accountgroupno}^${eventsessionindex}^${seatgroupindex}`; // accountgroupno^eventsessionindex^seatgroupindex
+    let deleteSeats = (  { accountGroupNo, eventSessionIndex, seatGroupIndex} ) => {
+    let mapkey = `${accountGroupNo}^${eventSessionIndex}^${seatGroupIndex}`; // accountgroupno^eventsessionindex^seatgroupindex
     if( seatsMap.has(mapkey) ){
         if( seatsMap.delete(mapkey) ){
             return true;
