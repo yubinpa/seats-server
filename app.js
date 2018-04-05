@@ -176,6 +176,8 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    // 메모리에서 시트 정보를 없앤다.
+    // 클라이언트는 
     socket.on('delete-seats-in-memory', clientData => {
 
         if( !checkAuth( clientData )){
