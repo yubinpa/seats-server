@@ -177,7 +177,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     // 메모리에서 시트 정보를 없앤다.
-    // 클라이언트는 
+    // 클라이언트는  my-delete-seats-in-memory-succ 또는 delete-seats-in-memory-succ가 호출되면 auth => group-seats 를 진행한다. 
     socket.on('delete-seats-in-memory', clientData => {
 
         if( !checkAuth( clientData )){
