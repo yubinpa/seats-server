@@ -3,6 +3,8 @@
     npm stop 
 # node 로 실행하기 
     node app.js
+## debug mode 로 실행하기 
+    DEBUG=* node app.js
 # config/config.json
 {
     "processTitle" : "seat-server-proc",
