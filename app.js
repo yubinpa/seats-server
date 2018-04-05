@@ -423,7 +423,7 @@ let createSeats = ( dbResult, { accountGroupNo, eventSessionIndex, seatGroupInde
     return seats;
 }
 
-let getseats = (  { accountgroupno, eventsessionindex, seatgroupindex} ) => {
+let getSeats = (  { accountgroupno, eventsessionindex, seatgroupindex} ) => {
     let mapkey = `${accountgroupno}^${eventsessionindex}^${seatgroupindex}`; // accountgroupno^eventsessionindex^seatgroupindex
     let seats = seatsMap.get(mapkey);
     return seats;
