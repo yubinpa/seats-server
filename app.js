@@ -176,6 +176,29 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    socket.on('delete-seats-in-memory', clientData => {
+
+        if( !checkAuth( clientData )){
+            logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
+            socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData });
+            return;
+        }
+
+        if( deleteSeats ( clientData )) {
+
+            logger.info(`delete-seats-in-memory succ: ${clientData.id}`);
+
+            socket.emit('my-delete-seats-in-memory-succ', { result : clientData, request : clientData } );
+
+            socket.broadcast.to( socket.roomName ).emit('delete-seats-in-memory-succ', { result : clientData, request : clientData } );
+
+        }else{
+
+            logger.error( `${JSON.stringify(ERROR.EMPTY_SEATS)} ${JSON.stringify(clientData)}`);
+            socket.emit('grid-error', { result : ERROR.EMPTY_SEATS, request : clientData });
+
+        }
+    });
     /**
      * 좌석 최소 
      */
@@ -347,10 +370,21 @@ let createSeats = ( dbResult, { accountGroupNo, eventSessionIndex, seatGroupInde
     return seats;
 }
 
-let getSeats = (  { accountGroupNo, eventSessionIndex, seatGroupIndex} ) => {
-    let mapKey = `${accountGroupNo}^${eventSessionIndex}^${seatGroupIndex}`; // accountGroupNo^eventSessionIndex^seatGroupIndex
-    let seats = seatsMap.get(mapKey);
+let getseats = (  { accountgroupno, eventsessionindex, seatgroupindex} ) => {
+    let mapkey = `${accountgroupno}^${eventsessionindex}^${seatgroupindex}`; // accountgroupno^eventsessionindex^seatgroupindex
+    let seats = seatsMap.get(mapkey);
     return seats;
+}
+
+let deleteSeats = (  { accountgroupno, eventsessionindex, seatgroupindex} ) => {
+    let mapkey = `${accountgroupno}^${eventsessionindex}^${seatgroupindex}`; // accountgroupno^eventsessionindex^seatgroupindex
+    if( seatsMap.has(mapkey) ){
+        if( seatsMap.delete(mapkey) ){
+            return true;
+        }
+    }else{
+        return false;
+    }
 }
 
 let checkAuth = ( { accountGroupNo, apiKey } )  => {
