@@ -138,6 +138,19 @@ class Seats {
     }
 
     /**
+     * 좌석을 없는 자리로 간주한다. 
+     */
+    deleteSeat( { rowIndex, colIndex } ){
+        try{
+            this.seats[rowIndex][colIndex].reserved = 'D';
+            return true;
+        }catch(ex){
+            console.error(`Error: ${ex.message}`);
+            return false;
+        }
+    }
+
+    /**
      * 여러개의 좌석을 취소합니다. 
      * 반환되는 배열이 비워 있으면 실패!
      */

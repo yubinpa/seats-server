@@ -202,6 +202,56 @@ io.sockets.on('connection', function (socket) {
         }
     });
     /**
+     * 좌석 삭제 
+     */
+    socket.on('deletet', clientData => {
+        
+        if( !checkAuth( clientData )){
+            logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
+            socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData });
+            return;
+        }
+
+        let seats = getSeats( clientData );
+
+        if( seats == undefined ){
+            logger.error( `${JSON.stringify(ERROR.EMPTY_SEATS)} ${JSON.stringify(clientData)}`);
+            socket.emit('grid-error', { result : ERROR.EMPTY_SEATS, request : clientData });
+        }else{
+
+            if( seats.cancel( clientData )) {
+                //socket.emit('grid-error', ERROR.RESERVE_FAILD);
+                logger.info(`delete succ : ${clientData.id}, row=${clientData.rowIndex}, col=${clientData.colIndex}`);
+
+                socket.emit('my-delete-succ', { result : clientData, request : clientData } );
+
+                //io.sockets.in(`${clientData.accountGroupNo}^${clientData.eventSessionIndex}`).emit('reserve-succ', clientData );
+                //io.sockets.in(socket.roomName).emit('cancel-succ', { result : clientData, request : clientData } );
+                socket.broadcast.to( socket.roomName ).emit('delete-succ', { result : clientData, request : clientData } );
+
+                dao.updateReservedSeat( 'D', clientData )
+                    .then( dbResult => {
+                        // DB에 업데이트한 데이터가 없다는 것은 ?
+                        // 클라이언트가 인덱스 값을 잘 못 전달했다는 얘기 
+                        if( dbResult.affectedRows < 1 ){
+                            logger.error(`delete was failed, maybe aleady delete or invalid seat index : ${JSON.stringify(clientData)}`);
+                            //socket.emit('grid-error', ERROR.RESERVE_FAILD);
+                        }
+                    })
+                    .catch( error => {
+                        //TODO : 실패한 예약좌석을 실패 로그 파일에 기록한다. (복구용)
+                        logger.error( `update delete seat error! ${JSON.stringify(clientData)}`);
+                        backupQueryLog( 'D', clientData );
+                    });
+            }else{
+                // 예약에 실패 했을 경우 
+                logger.info( `delete failed : ${clientData.id}, row=${clientData.rowIndex}, col=${clientData.colIndex}`);
+                socket.emit('delete-failed', { result : ERROR.RESERVE_FAILED, request : clientData });
+            }
+        }
+    });
+
+    /**
      * 좌석 최소 
      */
     socket.on('cancel', clientData => {
