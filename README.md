@@ -4,7 +4,8 @@
 # node 로 실행하기 
     node app.js
 ## debug mode 로 실행하기 
-    DEBUG=* node app.js
+    DEBUG=* node app.js ( 리눅스 )
+    set DEBUG=* & node app.js ( 윈도우 )
     
 # .vscode 디렉토리는 디버깅을 위한 디렉토리( 무시해도 됨 )
 # config/config.json

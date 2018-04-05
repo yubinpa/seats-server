@@ -140,7 +140,7 @@ class Seats {
     /**
      * 좌석을 없는 자리로 간주한다. 
      */
-    deleteSeat( { rowIndex, colIndex } ){
+    delete( { rowIndex, colIndex } ){
         try{
             this.seats[rowIndex][colIndex].reserved = 'D';
             return true;

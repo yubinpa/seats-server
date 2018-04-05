@@ -59,6 +59,8 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('auth', clientData => {
 
+        requestLog( 'auth', clientData );
+
         dao.selectAccount( clientData.id, clientData.apiKey )
             .then( dbResult => {
 
@@ -94,6 +96,8 @@ io.sockets.on('connection', function (socket) {
     // 처음 화면을 렌더링 할 때는 이 호출을 필수!
     socket.on('group-seats', clientData => {
         // TODO auth check
+
+        requestLog( 'group-seats', clientData );
 
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
@@ -131,7 +135,9 @@ io.sockets.on('connection', function (socket) {
      *  좌석 예약 ( 수동 )
      */
     socket.on('reserve', clientData => {
-        
+
+        requestLog( 'reserve', clientData );
+
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
             socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData });
@@ -180,6 +186,8 @@ io.sockets.on('connection', function (socket) {
     // 클라이언트는  my-delete-seats-in-memory-succ 또는 delete-seats-in-memory-succ가 호출되면 auth => group-seats 를 진행한다. 
     socket.on('delete-seats-in-memory', clientData => {
 
+        requestLog( 'delete-seats-in-memory', clientData);
+
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
             socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData });
@@ -206,6 +214,8 @@ io.sockets.on('connection', function (socket) {
      * 좌석 삭제 
      */
     socket.on('delete', clientData => {
+
+        requestLog( 'delete', clientData);
         
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
@@ -220,7 +230,7 @@ io.sockets.on('connection', function (socket) {
             socket.emit('grid-error', { result : ERROR.EMPTY_SEATS, request : clientData });
         }else{
 
-            if( seats.cancel( clientData )) {
+            if( seats.delete( clientData )) {
                 //socket.emit('grid-error', ERROR.RESERVE_FAILD);
                 logger.info(`delete succ : ${clientData.id}, row=${clientData.rowIndex}, col=${clientData.colIndex}`);
 
@@ -257,6 +267,8 @@ io.sockets.on('connection', function (socket) {
      */
     socket.on('cancel', clientData => {
         
+        requestLog( 'cancel', clientData);
+
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
             socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData });
@@ -306,6 +318,8 @@ io.sockets.on('connection', function (socket) {
      *  여러개의 좌석 예약을 취소한다. 
      */
     socket.on( 'cancel-seats', clientData => {
+
+        requestLog( 'cancel-seats', clientData );
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
             socket.emit('grid-error', { result : ERROR.AUTH_FAILED, request : clientData });
@@ -355,6 +369,8 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on( 'assign', clientData => {
+
+        requestLog( 'assign', clientData );
 
         if( !checkAuth( clientData )){
             logger.error( `${JSON.stringify(ERROR.AUTH_FAILED)} ${JSON.stringify(clientData)}`);
@@ -423,8 +439,8 @@ let createSeats = ( dbResult, { accountGroupNo, eventSessionIndex, seatGroupInde
     return seats;
 }
 
-let getSeats = (  { accountgroupno, eventsessionindex, seatgroupindex} ) => {
-    let mapkey = `${accountgroupno}^${eventsessionindex}^${seatgroupindex}`; // accountgroupno^eventsessionindex^seatgroupindex
+let getSeats = (  { accountGroupNo, eventSessionIndex, seatGroupIndex} ) => {
+    let mapkey = `${accountGroupNo}^${eventSessionIndex}^${seatGroupIndex}`; // accountgroupno^eventsessionindex^seatgroupindex
     let seats = seatsMap.get(mapkey);
     return seats;
 }
@@ -452,6 +468,10 @@ let checkAuth = ( { accountGroupNo, apiKey } )  => {
     else{
         return apiKey == memApiKey ? true : false;
     }
+}
+
+let requestLog = ( eventName, clientData ) => {
+    logger.info( `request > ${eventName} : ${JSON.stringify(clientData)}` );
 }
 
 
