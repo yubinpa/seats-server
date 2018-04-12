@@ -18,7 +18,7 @@ class Dao {
         return new Promise ( (resolve, reject ) => {
 
             let query = "SELECT seq, seat_group_name, \
-            CONCAT( seat_row_name, seat_column_name ) as seat_name, \
+            CONCAT( seat_row_name, '-', seat_column_name ) as seat_name, \
             seat_row_name, seat_row_index, seat_column_index, reserved \
             FROM to_seats \
             WHERE account_group_no = ? \

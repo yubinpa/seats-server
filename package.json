@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "forever start app.js",
     "stop": "forever stop 0",
-    "debug-start": "cross-env DEBUG=* node app.js"
+    "env" : "cross-env DEBUG=*",
+    "debug-start": "npm run env -- node app.js"
   },
   "author": "",
   "license": "ISC",
